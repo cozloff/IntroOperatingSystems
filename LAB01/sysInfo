@@ -1,0 +1,34 @@
+#!/bin/bash
+
+print_system_info(){
+	echo "-------------------------------System Information----------------------------"
+	echo -e "Hostname:\t\t$(whoami)-$(hostname)"
+	echo -e "uptime:\t\t\t"`uptime | awk '{print $3,$4}' | sed 's/,//'`
+	echo -e "Manufacturer:\t\t"`cat /sys/class/dmi/id/chassis_vendor`
+	echo -e "Product Name:\t\t"`cat /sys/class/dmi/id/product_name`
+	echo -e "Version:\t\t"`cat /sys/class/dmi/id/product_version` 
+	vserver=$(lscpu | grep Hypervisor | wc -l);
+	if [ $vserver -gt 0 ]; then
+		echo -e "Machine Type: \t\tVM"
+	else 
+		echo -e "Machine Type:\t\tPhysical"
+	fi
+	echo -e "Operating System:\t"`source /etc/os-release && echo $PRETTY_NAME`
+	echo -e "Kernel:\t\t\t"`uname -r`
+	echo -e "Architecture:\t\t"`uname -m`
+	echo -e "Processor Name:\t\t"`awk -F': ' '/model name/{print $2; exit}' /proc/cpuinfo`
+	echo -e "Active User:\t\t"`whoami`
+	echo -e "Main System IP:\t\t"`hostname -I | awk '{print $1}'`
+}
+
+if [ "$#" -ne 1 ]; then
+	echo "Usage: sysInfo <sys>"
+	exit 1
+fi
+
+if [ "$1" == "sys" ]; then
+	print_system_info
+else
+	echo "Error, invalid parameter."
+	exit 1
+fi
